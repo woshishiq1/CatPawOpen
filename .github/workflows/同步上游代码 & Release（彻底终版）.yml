@@ -9,7 +9,7 @@ on:
 
 env:
   # 【配置 1】是否开启冗余删除 (同步删除上游已删的 Release)true开启 false关闭
-  DELETE_EXCESS_RELEASES: false 
+  DELETE_EXCESS_RELEASES: true 
 
   # 【配置 2】上游（原作者）的仓库名 (格式: 用户名/仓库名)
   UPSTREAM_REPO: "CatPawApp/CatPawOpen"
@@ -21,17 +21,19 @@ env:
   MAIN_BRANCH: "main"
 
 jobs:
-  sync_full:
+  sync:
     runs-on: ubuntu-latest
     permissions:
-      contents: write 
-
+      contents: write
+      actions: write
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # 使用你设置的变量 MY_GIT_TOKEN 以绕过默认 GITHUB_TOKEN 的工作流权限限制
+          token: ${{ secrets.MY_GIT_TOKEN }}
 
       - name: Setup git identity
         run: |
@@ -82,7 +84,8 @@ jobs:
 
       - name: Sync Releases (Smart Mirror)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 同步 Release 步骤也建议换成你的 Token 以防万一
+          GITHUB_TOKEN: ${{ secrets.MY_GIT_TOKEN }}
         run: |
           set -e
           # 获取 Tag 列表
@@ -121,14 +124,14 @@ jobs:
 
   cleanup_runs:
     runs-on: ubuntu-latest
-    needs: sync_full
+    needs: sync
     permissions:
       actions: write
     steps:
       - name: Delete old workflow runs
         uses: Mattraks/delete-workflow-runs@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.MY_GIT_TOKEN }}
           repository: ${{ env.TARGET_REPO }}
           retain_days: 0
           keep_minimum_runs: 10
