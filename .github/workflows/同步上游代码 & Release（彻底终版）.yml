@@ -9,7 +9,7 @@ on:
 
 env:
   # 【配置 1】是否开启冗余删除 (同步删除上游已删的 Release)true开启 false关闭
-  DELETE_EXCESS_RELEASES: true 
+  DELETE_EXCESS_RELEASES: false 
 
   # 【配置 2】上游（原作者）的仓库名 (格式: 用户名/仓库名)
   UPSTREAM_REPO: "CatPawApp/CatPawOpen"
